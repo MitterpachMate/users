@@ -52,6 +52,50 @@ namespace users.Controllers
             }
         }
 
+        [HttpGet("{id}")]
+        public ActionResult<UserDto> Get(Guid id)
+        {
+
+            try
+            {
+                connect.connection.Open();
+
+                string sql = "SELECT * FROM users WHERE Id=@ID";
+
+                MySqlCommand cmd = new MySqlCommand(sql, connect.connection);
+
+                cmd.Parameters.AddWithValue("Id", id);
+
+                MySqlDataReader reader = cmd.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    var result = new UserDto(
+                        reader.GetGuid("Id"),
+                        reader.GetString("Name"),
+                        reader.GetString("Email"),
+                        reader.GetInt32("Age"),
+                        reader.GetDateTime("Created")
+                        );
+
+                    connect.connection.Close();
+                    return StatusCode(200, result);
+                }
+                else
+                {
+                    Exception e = new();
+                    connect.connection.Close();
+                    return StatusCode(404, e.Message);
+                }
+
+            }
+            catch (Exception e)
+            {
+
+                return BadRequest(e.Message);
+            }
+        }
+
         [HttpPost]
         public ActionResult<User> Post(CreateUserDto createUser)
         {
