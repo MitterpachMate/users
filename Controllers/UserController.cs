@@ -1,6 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using MySql.Data.MySqlClient;
+using System.Security.Cryptography.X509Certificates;
+using System.Xml.Linq;
 using users.Models;
 using static users.Dtos;
 
@@ -139,9 +142,42 @@ namespace users.Controllers
             catch (Exception e)
             {
                 return BadRequest(e.Message);
-            }
+            }            
+
 
 
         }
+
+        [HttpPost]
+
+        public ActionResult<User> Put(UpdateUserDto updateUser, Guid Id)
+        {
+            try
+            {
+                connect.connection.Open();
+
+                string sql = $"UPDATE `users` SET `Name`=@Name,`Email`=@Email,`Age`=@Age WHERE Id =@Id";
+
+                MySqlCommand cmd = new MySqlCommand(sql, connect.connection);
+
+                cmd.Parameters.AddWithValue("Name", updateUser.Name);
+                cmd.Parameters.AddWithValue("Email", updateUser.Email);
+                cmd.Parameters.AddWithValue("Age", updateUser.Age);
+
+                cmd.ExecuteNonQuery();
+
+                connect.connection.Close();
+
+                return StatusCode(201);
+
+            }
+            catch (Exception e)
+            {
+
+                return BadRequest(e.Message);
+            }
+
+        }
+
     }
 }
